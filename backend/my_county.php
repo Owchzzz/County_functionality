@@ -1,3 +1,10 @@
+<?php if(isset($action)) {
+	if($action == true) {
+		echo '<div class="updated notice is-dismissible"><p>Succesfully deleted post.</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
+	}
+}
+?>
+
 <div class="wrap">
 	<h4>
 		<i class="dashicons-before dashicons-location"></i><?php echo $county['name'];?>
@@ -29,11 +36,11 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 class Techriver_maplists_list extends WP_List_Table{
 	protected $tablename; //Name of table you are going to use refer to contructor function
 	protected $per_page; //Items per page. Set in the constructor function
-	
+	protected $county;
 	protected $columns; // Columns for the table set in the constructor function
 	
 	
-	  public function __construct() {
+	  public function __construct($county) {
  
         parent::__construct( [
             'singular' => __( 'List', 'sp' ), //singular name of the listed records
@@ -42,7 +49,7 @@ class Techriver_maplists_list extends WP_List_Table{
  
         ] );
 		global $wpdb;
-		  
+		  $this->county = $county;
 		  
 		//Settings
 		$this->tablename = $wpdb->prefix . 'tc_county'; //Change this to the table name of your data
@@ -60,9 +67,8 @@ class Techriver_maplists_list extends WP_List_Table{
  
     }
 	
-	public function get_data($per_page = 10, $page_number = 1) {
+	public function get_data($per_page = 1, $page_number = 1) {
 		global $wpdb;
-		global $county;
  
 		$args = array(
 		'posts_per_page' => $per_page,
@@ -70,12 +76,29 @@ class Techriver_maplists_list extends WP_List_Table{
 		
 		if(! empty($_REQUEST['orderby']) ) {
 			$args['orderby'] = $_REQUEST['orderby'];
+			$args['order'] = $_REQUEST['order'];
 		}
 		
-		$args['post_type'] = $county['custom_post_id'];
-		$results = get_posts($args);
+		if(! empty($_REQUEST['s'])) {
+			$args['s'] = $_REQUEST['s'];
+		}
+		
+		$args['post_type'] = $this->county['custom_post_id'];
+		$results = (array) get_posts($args);
+		
+		$fresults = array();
+		foreach($results as $result) {
+			$rawarr = $result;
+			$finarr = array();
+			foreach($rawarr as $key=>$val) {
+				$finarr[$key] = $val;
+			}
+			$fresults[] = $finarr;
+		}
+		//echo 'County id: '.$this->county['custom_post_id'];
+		//var_dump($results);
 
-		 return $results;
+		 return $fresults;
 	}
 	
 	public static function delete_data( $id, $tablename ) {
@@ -87,12 +110,11 @@ class Techriver_maplists_list extends WP_List_Table{
 		  );
 	}
 	
-	public static function record_count($tablename) {
-  		global $wpdb;
- 
-  		$sql = "SELECT COUNT(*) FROM ".$tablename;
- 
-  		return $wpdb->get_var( $sql );
+	public static function record_count($county) {
+  		$args = array('post_type'=>$county['custom_post_id']);
+		$results = get_posts($args);
+ 		
+  		return count($results);
 	}
 	
 	
@@ -126,7 +148,7 @@ class Techriver_maplists_list extends WP_List_Table{
 	 */
 	function column_cb( $item ) {
 		return sprintf(
-			'<input type="checkbox" name="bulk-delete[]" value="%s" />', $item['id']
+			'<input type="checkbox" name="bulk-delete[]" value="%s" />', $item['ID']
 		);
 	}
 	/**
@@ -140,7 +162,7 @@ class Techriver_maplists_list extends WP_List_Table{
 		$delete_nonce = wp_create_nonce( 'sp_delete_customer' );
 		$title = '<strong>' . $item['name'] . '</strong>';
 		$actions = [
-			'delete' => sprintf( '<a href="?page=%s&action=%s&customer=%s&_wpnonce=%s">Delete</a>', esc_attr( $_REQUEST['page'] ), 'delete', absint( $item['id'] ), $delete_nonce )
+			'delete' => sprintf( '<a href="?page=%s&action=%s&customer=%s&_wpnonce=%s">Delete</a>', esc_attr( $_REQUEST['page'] ), 'delete', absint( $item['ID'] ), $delete_nonce )
 		];
 		return $title . $this->row_actions( $actions );
 	}
@@ -148,10 +170,10 @@ class Techriver_maplists_list extends WP_List_Table{
 	function column_id( $item ) {
 		$delete_nonce = wp_create_nonce( 'sp_delete_customer');
 		$modify_nonce = wp_create_nonce( 'sp_modify_customer' );
-		$title = '<strong>' . $item['id'] . '</strong>';
+		$title = '<strong>' . $item['ID'] . '</strong>';
 		$actions = [
-			'delete' => sprintf( '<a href="?page=%s&action=%s&id=%s&_wpnonce=%s">Delete</a>', esc_attr( $_REQUEST['page'] ), 'delete', absint( $item['id'] ), $delete_nonce ),
-			'modify' => sprintf( '<a href="?page=%s&action=%s&id=%s&_wpnonce=%s">Modify</a>',esc_attr( $_REQUEST['page'] ), 'modify', absint( $item['id'] ), $modify_nonce )
+			'delete' => sprintf( '<a href="?page=%s&action=%s&id=%s&_wpnonce=%s">Delete</a>', esc_attr( $_REQUEST['page'] ), 'delete', absint( $item['ID'] ), $delete_nonce ),
+			'modify' => '<a href="'.admin_url('post.php?post='.$item['ID'].'&action=edit').'">Modify</a>'
 		];
 		return $title . $this->row_actions( $actions );
 	}
@@ -172,7 +194,7 @@ class Techriver_maplists_list extends WP_List_Table{
 	public function get_sortable_columns() {
 		$sortable_columns = array(
 			'name' => array( 'name', true ),
-			'id' => array ( 'id', true)
+			'ID' => array ( 'ID', true)
 		);
 		return $sortable_columns;
 	}
@@ -200,7 +222,7 @@ class Techriver_maplists_list extends WP_List_Table{
 		$this->process_bulk_action();
 		$per_page     = $this->per_page;
 		$current_page = $this->get_pagenum();
-		$total_items  = self::record_count($this->tablename);
+		$total_items  = self::record_count($this->county);
 		$this->set_pagination_args( [
 			'total_items' => $total_items, //WE have to calculate the total number of items
 			'per_page'    => $per_page //WE have to determine how many items to show on a page
@@ -225,9 +247,12 @@ class Techriver_maplists_list extends WP_List_Table{
 		}
 	}
 }
-$map_lists_list = new Techriver_maplists_list();
+$map_lists_list = new Techriver_maplists_list($county);
+
 $map_lists_list->prepare_items();
+$map_lists_list->search_box('Search Posts', 'search-box');
 $map_lists_list->display();
+
 ?> <!--END OF MAP List Table PHP-->
 				
 	</form>

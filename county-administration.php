@@ -39,13 +39,34 @@ class tc_county_administration {
 				'Write new post',
 				'edit_county',
 				$this->admin_menu_slug.'_add_blogpost',
-				'edit.php?post_type='.$county['custom_post_id']
+				array($this,'load_add_new_post')
 				);
 		}
 	}
 	
+	public function load_add_new_post() {
+		global $wpdb;
+		$cid = $this->countyID;
+		$sql = "SELECT * FROM {$this->table} WHERE id={$cid}";
+		$data = $wpdb->get_results($sql,ARRAY_A);
+		if(!empty($data)){
+			$county = $data[0];
+			echo '<meta <META http-equiv="refresh" content="0;URL='.admin_url('post-new.php?post_type='.$county['custom_post_id']).'">';
+		}
+		else {
+			echo '<meta <META http-equiv="refresh" content="0;URL='.admin_url('admin.php?page='.$this->admin_menu_slug).'">';
+		}
+		
+	}
+	
 	public function load_admin() {
 		$county = $this->get_county();
+		if(isset($_GET['action'])) {
+			if($_GET['action'] == 'delete') {
+				wp_delete_post($_GET['id'],true);
+				$action = true;
+			}
+		}
 		require_once('backend/my_county.php');
 	}
 	
