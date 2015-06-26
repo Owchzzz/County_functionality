@@ -14,7 +14,7 @@ if( !class_exists('TC_County_functionality')) {
 	class TC_County_functionality {
 		
 		protected $version;
-		protected $table;
+		public $table;
 		protected $loader;
 		public function __construct() {
 			global $wpdb;
@@ -36,16 +36,30 @@ if( !class_exists('TC_County_functionality')) {
 			$this->loader->update();
 			add_action('admin_menu',array($this,'register_menus'));
 			add_action('init',array($this,'initialize_page'));
+			
+			add_action('admin_init',array($this,'register_roles'));
 		}
 		
+		public function register_roles() {
+			$this->loader->roles();
+		}
+		
+		
 		public function initialize_page() {
+			$args = array('name'=>'tc_county_func_main','post_type'=>'page','post_status'=>'trash'); // Delete from trash.
+			$posts = get_posts($args);
+			foreach($posts as $post) {
+				wp_delete_post($post->ID,true);
+			}
+			
+			
 			$page = get_posts( array( 'name' => 'tc_county_func_main', 'post_type' => 'page'));
 			if(empty($page) || $page === null) {
 				$page_build = array(
 						'post_name' => 'tc_county_func_main',
 						'post_title' => 'Counties',
 						'post_status' => 'publish',
-						'post_content' => '[load_county id="'.$county['id'].'"]',
+						'post_content' => '[load_main_county]',
 						'post_excerpt' => 'Main County Page.',
 						'post_type' => 'page'
 					);
@@ -72,9 +86,12 @@ if( !class_exists('TC_County_functionality')) {
 			global $wpdb;
 			if(isset($_GET['action'])) {
 				if($_GET['action'] == 'delete') {
-					if($_SESSION['verifiednonce'] != $_GET['_wpnonce']){
+					//if($_SESSION['verifiednonce'] != $_GET['_wpnonce']){
 						if(wp_verify_nonce($_GET['_wpnonce'],'sp_delete_customer')) {
 							$_SESSION['verifiednonce'] = $_GET['_wpnonce'];
+							
+							$data = $wpdb->get_results("SELECT * FROM {$this->table} WHERE id={$_GET['id']}",ARRAY_A);
+							wp_delete_post($data[0]['post_id'],true); // Delete the page.
 							$res = $wpdb->delete($this->table,array('id'=>$_GET['id']));
 							$_SESSION['status'] = true;
 							if($res) {
@@ -84,10 +101,10 @@ if( !class_exists('TC_County_functionality')) {
 								$_SESSION['delete_status'] = false;
 							}
 						}
-						else {
-
-						}
-					}
+						//else {
+							
+						//}
+					//}
 						
 				}
 			}
@@ -189,4 +206,7 @@ if( !class_exists('TC_County_functionality')) {
 	
 	$tccounty = new TC_County_functionality();
 	register_activation_hook(__FILE__,array(&$tccounty,'install'));
+	
+	
+	
 }

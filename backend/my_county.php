@@ -1,69 +1,32 @@
-<style>
-#message {
-	display:block;
-	clear:both;
-}
-#message p {
-	padding-left:0px;
-	text-align:left;
-}
-</style>
-<?php 
-function show_msg($success=true,$message="") {
-	
-	$class = $success ? 'updated' : 'error';
-	echo '<div id="message" class="'.$class.' notice is-dismissible">
-	<p>'.$message.'</p>
-	<button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button>
-	</div>';
-	$_SESSION['status'] = false;
-}
-if(isset($_GET['status']) && isset($_SESSION['status']) && $_SESSION['status'] == true) {
-	if($_GET['status'] == 'success_insert_new_county') {
-		show_msg(true,'Successfully inserted new county.');
-	}
-	else if($_GET['status'] == 'bulk_delete_complete') {
-		show_msg(true,'Successfully completed delete function.');
-	}
-	else if($_GET['status'] == 'success_modify' && isset($_SESSION['status']) && $_SESSION['status'] == true) {
-		show_msg(true,'Successfully modified county.');
-	}
-
-}
-
-
-if(isset($_GET['action']) && isset($_SESSION['status']) && $_SESSION['status'] == true) {
-	if($_GET['action'] == 'delete' && isset($_SESSION['delete_status'])) {
-		if( $_SESSION['delete_status'] == true) {
-			show_msg(true,'Sucessfully deleted county.');
-		}
-		else {
-			show_msg(true,'Unable to delete county.');
-		}
-	}
-}
-
-?>
-
-
 <div class="wrap">
-	
-	<div class="wrap">
-	<h2 style="float:left; clear:both;">
-		County Administration
-	</h2>
-	<a href="<?php echo admin_url('admin.php?page=county_func_admin_add_county');?>" style="padding:5px 10px;background-color:#fafafa;float:left;text-decoration:none;margin-top:10px;">Add new</a>
-	<div style="clear:both;">
-		
+	<h4>
+		<i class="dashicons-before dashicons-location"></i><?php echo $county['name'];?>
+	</h4>
+	<div class="postbox dismissible" style="padding:15px;">
+		<h3>
+			Welcome to county administration!
+		</h3>
+		<p>
+			Here you will be able to manage all the aspects of your county. If you find any problems / bugs please email <a href="#">owchzzz@gmail.com</a>
+		</p>
 	</div>
-	<hr/>
-	<form method="POST">
+	<div style="display:block;height:10px;clear:both;">
+		<!-- Empty Block-->
+	</div>
+	<div class="postbox blog-posts" style="padding:15px;width:60%;float:left;">
+		<h2 style="margin-bottom:15px;">
+			Blogs Posts <a href="<?php echo admin_url('post-new.php?post_type='.$county['custom_post_id']);?>" class="add-new-h2">Add new</a>
+		</h2>
+		<hr/>
+		
+		<!--TABLE-->
+		<form method="POST">
 
 	<?php // Show table
 if ( ! class_exists( 'WP_List_Table' ) ) {
     require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
 }
-class Tc_county_list extends WP_List_Table{
+class Techriver_maplists_list extends WP_List_Table{
 	protected $tablename; //Name of table you are going to use refer to contructor function
 	protected $per_page; //Items per page. Set in the constructor function
 	
@@ -83,16 +46,14 @@ class Tc_county_list extends WP_List_Table{
 		  
 		//Settings
 		$this->tablename = $wpdb->prefix . 'tc_county'; //Change this to the table name of your data
-		$this->per_page = 15; //Change this to the number of items per page.
+		$this->per_page = 10; //Change this to the number of items per page.
 		
 		  
 		 $this->columns = array( // Columns for the table please use the correct identifier for the key. use the exact same name as what is stored on database.
-			  'cb'      => '<input type="checkbox" />', // Leave this in for bulk functionality
-			 'id' => 'ID',
-			 'name' => 'Name',
-			 'state' => 'State',
-			 'custom_post_id' => 'Custom Post ID',
-			 'county_admin' => 'Administrator',
+			 'cb'      => '<input type="checkbox" />', // Leave this in for bulk functionality
+			 'ID' => 'ID',
+			 'post_title' => 'Title',
+			 
 			 
 		 );
 		
@@ -101,21 +62,20 @@ class Tc_county_list extends WP_List_Table{
 	
 	public function get_data($per_page = 10, $page_number = 1) {
 		global $wpdb;
-		
-		 $sql = "SELECT * FROM {$this->tablename}";
-		 if(isset($_POST['s']) && $_POST['s'] !== '') {
-			 $search = mysql_real_escape_string($_POST['s']);
-			 $sql = "SELECT * FROM {$this->tablename} WHERE name LIKE '%{$search}%'";
-		 }
+		global $county;
  
-		 if ( ! empty( $_REQUEST['orderby'] ) ) {
-		   $sql .= ' ORDER BY ' . esc_sql( $_REQUEST['orderby'] );
-		   $sql .= ! empty( $_REQUEST['order'] ) ? ' ' . esc_sql( $_REQUEST['order'] ) : ' ASC';
-		 }
-		 $sql .= " LIMIT $per_page";
-		 $sql .= ' OFFSET ' . ( $page_number - 1 ) * $per_page;
-		 $result = $wpdb->get_results( $sql, 'ARRAY_A' );
-		 return $result;
+		$args = array(
+		'posts_per_page' => $per_page,
+		'offset' => ($page_number - 1) * $per_page);
+		
+		if(! empty($_REQUEST['orderby']) ) {
+			$args['orderby'] = $_REQUEST['orderby'];
+		}
+		
+		$args['post_type'] = $county['custom_post_id'];
+		$results = get_posts($args);
+
+		 return $results;
 	}
 	
 	public static function delete_data( $id, $tablename ) {
@@ -149,11 +109,7 @@ class Tc_county_list extends WP_List_Table{
 	 * @return mixed
 	 */
 	public function column_default( $item, $column_name ) {
-		$user = get_user_by('id',$item['county_admin']);
 		switch ( $column_name ) {
-			case 'county_admin':
-				return '<a href="'.admin_url('user-edit.php?user_id='.$user->data->ID).'">'.$user->data->display_name.'</a>';
-				break;
 			case 'special':
 			case 'city':
 				return $item[ $column_name ];
@@ -180,6 +136,14 @@ class Tc_county_list extends WP_List_Table{
 	 *
 	 * @return string
 	 */
+	function column_name( $item ) {
+		$delete_nonce = wp_create_nonce( 'sp_delete_customer' );
+		$title = '<strong>' . $item['name'] . '</strong>';
+		$actions = [
+			'delete' => sprintf( '<a href="?page=%s&action=%s&customer=%s&_wpnonce=%s">Delete</a>', esc_attr( $_REQUEST['page'] ), 'delete', absint( $item['id'] ), $delete_nonce )
+		];
+		return $title . $this->row_actions( $actions );
+	}
 	
 	function column_id( $item ) {
 		$delete_nonce = wp_create_nonce( 'sp_delete_customer');
@@ -187,17 +151,9 @@ class Tc_county_list extends WP_List_Table{
 		$title = '<strong>' . $item['id'] . '</strong>';
 		$actions = [
 			'delete' => sprintf( '<a href="?page=%s&action=%s&id=%s&_wpnonce=%s">Delete</a>', esc_attr( $_REQUEST['page'] ), 'delete', absint( $item['id'] ), $delete_nonce ),
-			'modify' => sprintf( '<a href="?page=%s&action=%s&id=%s&_wpnonce=%s">Modify</a>',esc_attr( 'county_func_admin_edit_county' ), 'modify', absint( $item['id'] ), $modify_nonce )
+			'modify' => sprintf( '<a href="?page=%s&action=%s&id=%s&_wpnonce=%s">Modify</a>',esc_attr( $_REQUEST['page'] ), 'modify', absint( $item['id'] ), $modify_nonce )
 		];
 		return $title . $this->row_actions( $actions );
-	}
-	
-	function column_name( $item ) {
-		global $wpdb;
-		$data = $wpdb->get_results("SELECT * FROM {$this->tablename} WHERE id={$item['id']}",ARRAY_A);
-		
-		$title = '<a href="'.admin_url('post.php?post='.$data[0]['post_id']).'&action=edit">'.$item['name'].'</a>';
-		return $title;
 	}
 	/**
 	 *  Associative array of columns
@@ -215,6 +171,7 @@ class Tc_county_list extends WP_List_Table{
 	 */
 	public function get_sortable_columns() {
 		$sortable_columns = array(
+			'name' => array( 'name', true ),
 			'id' => array ( 'id', true)
 		);
 		return $sortable_columns;
@@ -249,7 +206,7 @@ class Tc_county_list extends WP_List_Table{
 			'per_page'    => $per_page //WE have to determine how many items to show on a page
 		] );
 		$this->items = $this->get_data( $per_page, $current_page );
-		
+		$this->process_bulk_action();
 	}
 	public function process_bulk_action() {
 		
@@ -257,31 +214,34 @@ class Tc_county_list extends WP_List_Table{
 		if ( ( isset( $_POST['action'] ) && $_POST['action'] == 'bulk-delete' )
 		     || ( isset( $_POST['action2'] ) && $_POST['action2'] == 'bulk-delete' )
 		) {
-							$delete_ids = esc_sql( $_POST['bulk-delete'] );
-			if(!empty($delete_ids)) {
-				$_SESSION['status'] = true;
-				// loop over the array of record IDs and delete them
-				foreach ( $delete_ids as $id ) {
-					$this->delete_data($id,$this->tablename);
-				}
-				//wp_redirect( admin_url('admin.php?page=tcmaplists_admin')  );
+			$delete_ids = esc_sql( $_POST['bulk-delete'] );
+			// loop over the array of record IDs and delete them
+			foreach ( $delete_ids as $id ) {
+				$this->delete_data($id,$this->tablename);
 			}
-				
-			echo '<meta http-equiv="refresh" content="0; url='.admin_url('admin.php?page=county_func_admin&status=bulk_delete_complete').'">';
+			//wp_redirect( admin_url('admin.php?page=tcmaplists_admin')  );
+			echo '<meta http-equiv="refresh" content="0; url='.admin_url('admin.php?page=tcmaplists_admin').'">';
 			exit;
 		}
 	}
 }
-$map_lists_list = new Tc_county_list();
-if(isset($_POST['s'])) $map_lists_list->prepare_items($_POST['s']);
-else $map_lists_list->prepare_items();
-$map_lists_list->search_box('Search', 'search-table');
+$map_lists_list = new Techriver_maplists_list();
+$map_lists_list->prepare_items();
 $map_lists_list->display();
-
 ?> <!--END OF MAP List Table PHP-->
 				
 	</form>
-</div>
-
-
+		
+		<!--END OF TABLE-->
+	</div>
+	
+	
+	<div class="postbox blog-widgets" style="padding:15px;width:32%;float:right;">
+		<h4>
+			Sidebar
+		</h4>
+		<p style="background-color:#fafafa">
+			More Settings and functionality here.
+		</p>
+	</div>
 </div>

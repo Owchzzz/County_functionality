@@ -8,6 +8,7 @@ if(!class_exists('tc_county_loader_spec')) {
 		}	
 		
 		public function load_dependencies() {
+			
 			if(! post_type_exists('tc_county')) { // Register the county post type.
 				$args = array(
 						'labels' => array(
@@ -119,10 +120,19 @@ if(!class_exists('tc_county_loader_spec')) {
 		private function build_posts($counties) {
 			foreach($counties as $county) {
 				if( ! post_type_exists($county['custom_post_id']) ) {
+					
+					$labels = array(
+						'name' => 'County Posts',
+						'singular_name' => 'County Post',
+						'add_new' => 'Post to '.$county['name'],
+						'add_new_item' => 'Post to '.$county['name'],
+					);
 					$args = array(
+						'labels' => $labels,
 						'name' => $county['name'],
 						'has_archive' => true,
-						'public' => false
+						'public' => true,
+						'show_in_menu' => false
 					);
 					register_post_type($county['custom_post_id'], $args);
 				}

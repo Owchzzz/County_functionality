@@ -1,6 +1,7 @@
 <?php
 require_once('county-loader.php');
 require_once('county-frontend.php');
+require_once('county-administration.php');
 if(!class_exists('TC_County_loader')) {
 	class TC_County_loader {
 		protected $version;
@@ -35,6 +36,29 @@ if(!class_exists('TC_County_loader')) {
 		}
 		
 		
+		public function roles() { // Initialize Roles
+			//add user role
+			if(!get_role('county_administrator')) {
+				$result = add_role(
+				'county_administrator',
+				'County Administrator',
+				array( // Capabilities
+					'read' => true,
+					'edit_county' => true,
+				)
+				
+				);
+			}
+			
+			
+			
+			$role = get_role( 'administrator' );
+			$role->add_cap('edit_county');
+			
+			$role = get_role( 'author' );
+			$role->add_cap('edit_county');
+		}
+		
 		public function update() {
 			if($this->version != get_option('tc_county_func_ver')) {
 				$this->create_table();
@@ -46,9 +70,20 @@ if(!class_exists('TC_County_loader')) {
 		
 		
 		public function run_check() {
+			global $wpdb;
 			$this->county_loader->load_dependencies();
 			$this->county_loader->check_unassigned_counties();
 			$this->county_loader->run_page_init();
+			
+			$user_id = get_current_user_id();
+
+			$sql = "SELECT * FROM {$this->table} WHERE county_admin={$user_id}";
+			$data = $wpdb->get_results($sql,ARRAY_A);
+	
+			foreach($data as $mycounty) {
+				
+				$tc_admin = new tc_county_administration($this->table,$mycounty['id']);
+			}
 			
 		}
 		
