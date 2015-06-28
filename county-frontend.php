@@ -58,7 +58,7 @@ class tc_county_frontend {
 		global $wpdb;
 		$data = $wpdb->get_results("SELECT * FROM {$this->table}",ARRAY_A);
 		foreach($data as $county) {
-			$output .= "<li><a href=\"\">{$county['name']}</a>";
+			$output .= "<li><a href=\"".site_url('index.php/tc_county/'.$county['custom_page_id'])."\">{$county['name']}</a>";
 		}
 		
 		return $output;

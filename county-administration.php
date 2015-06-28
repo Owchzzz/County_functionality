@@ -13,12 +13,36 @@ class tc_county_administration {
 		$this->admin_menu_slug = 'menu_county_'.$countyID;
 		//Perform the checks and initialize
 		add_action('admin_menu',array($this,'load_admin_menu'));
+		add_action('wp_dashboard_setup',array($this,'load_dashboard'));
 
 	}
+	
+	public function load_dashboard() {
+		global $wpdb;
+		$sql = "SELECT * FROM {$this->table} WHERE id={$this->countyID}";
+		$data = $wpdb->get_row($sql,ARRAY_A);
+		wp_add_dashboard_widget(
+			'county_dashboard_'.$this->countyID,
+			$data['name'],
+			array($this,'load_dashboard_widget')
+		);
+	}
+	
+	public function load_dashboard_widget() {
+		echo 'Any relevant information about your county will be displayed here.';
+	}
+	
+	
 	
 	public function load_admin_menu() {
 		$cid = $this->countyID;
 		global $wpdb;
+		
+		if(!current_user_can('manage_options')) {
+			if(current_user_can('edit_county')) {
+				remove_menu_page('edit.php');
+			}
+		}
 		
 		$sql = "SELECT * FROM {$this->table} WHERE id={$cid}";
 		$data = $wpdb->get_results($sql,ARRAY_A);

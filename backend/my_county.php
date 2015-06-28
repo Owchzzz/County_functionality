@@ -9,7 +9,7 @@
 	<h4>
 		<i class="dashicons-before dashicons-location"></i><?php echo $county['name'];?>
 	</h4>
-	<div class="postbox dismissible" style="padding:15px;">
+	<div class="postbox is-dismissible" style="padding:15px;">
 		<h3>
 			Welcome to county administration!
 		</h3>
@@ -19,6 +19,10 @@
 	</div>
 	<div style="display:block;height:10px;clear:both;">
 		<!-- Empty Block-->
+	</div>
+	
+	<div class="postbox" style="padding:15px;width:90%;margin-bottom:15px;">
+		<b>Admin menu</b>: <a href="<?php echo admin_url('post.php?post='.$county['post_id'].'&action=edit');?>">Edit Main County Page</a>
 	</div>
 	<div class="postbox blog-posts" style="padding:15px;width:60%;float:left;">
 		<h2 style="margin-bottom:15px;">

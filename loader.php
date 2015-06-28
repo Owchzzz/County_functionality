@@ -36,27 +36,57 @@ if(!class_exists('TC_County_loader')) {
 		}
 		
 		
+		private function add_role_priv($role,$admin=false) {
+			$role->add_cap('edit_singular_county');
+			$role->add_cap('read_singular_county');
+			
+			if($admin) {
+				$role->add_cap('delete_singular_county');
+				$role->add_cap('edit_others_plural_county');
+			}
+
+		}
+		
+		private function role_access($role,$admin=false) {
+			$role->add_cap('edit_edit_county');
+			$role->add_cap('read_edit_county');
+			$role->add_cap('edit_edit_countys');
+			$role->add_cap('edit_others_edit_countys');
+			$role->add_cap('delete_edit_county');
+			$role->add_cap('publish_edit_countys');
+			$role->add_cap('read_private_edit_countys');
+			if($admin == 'county') {
+				$role->add_cap('edit_posts');
+			}
+		}
+		
 		public function roles() { // Initialize Roles
 			//add user role
-			if(!get_role('county_administrator')) {
+			//if(!get_role('county_administrator')) {
 				$result = add_role(
 				'county_administrator',
 				'County Administrator',
 				array( // Capabilities
 					'read' => true,
+					'edit_posts' => true,
 					'edit_county' => true,
 				)
 				
 				);
-			}
+			//}
 			
 			
+			$role = get_role('county_administrator');
+			$this->role_access($role,'county');
+			//var_dump($role);
 			
 			$role = get_role( 'administrator' );
 			$role->add_cap('edit_county');
+			$this->role_access($role,true);
 			
 			$role = get_role( 'author' );
 			$role->add_cap('edit_county');
+			$this->role_access($role,false);
 		}
 		
 		public function update() {

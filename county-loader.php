@@ -9,7 +9,7 @@ if(!class_exists('tc_county_loader_spec')) {
 		
 		public function load_dependencies() {
 			
-			if(! post_type_exists('tc_county')) { // Register the county post type.
+			//if(! post_type_exists('tc_county')) { // Register the county post type.
 				$args = array(
 						'labels' => array(
 							'name' => __('Counties'),
@@ -18,10 +18,19 @@ if(!class_exists('tc_county_loader_spec')) {
 						'name' => 'County',
 						'has_archive' => true,
 						'public' => true, 
-						'show_in_menu' => false
+						'show_in_menu' => false,
+						'capability_type' => 'edit_county'
+						//'capability_type'     => array('edit_county'),
 					);
+				if(!current_user_can('manage_options')) {	
+					$args['capabilities'] = array('create_posts' => false);
+				}
+				
 					register_post_type('tc_county', $args);
-			}
+					global $wp_post_types;
+					$wp_post_types['tc_county']->capability_type ='edit_county';
+	
+			//}
 		}
 		
 		public function check_unassigned_counties() {
@@ -119,7 +128,7 @@ if(!class_exists('tc_county_loader_spec')) {
 		
 		private function build_posts($counties) {
 			foreach($counties as $county) {
-				if( ! post_type_exists($county['custom_post_id']) ) {
+				//if( ! post_type_exists($county['custom_post_id']) ) {
 					
 					$labels = array(
 						'name' => 'County Posts',
@@ -132,10 +141,14 @@ if(!class_exists('tc_county_loader_spec')) {
 						'name' => $county['name'],
 						'has_archive' => true,
 						'public' => true,
-						'show_in_menu' => false
+						'show_in_menu' => false,
+						'capability_type' => 'edit_county',
+						'capabilities' => array('edit_posts'=>'edit_county','edit_post'=>'edit_county')
+						//'capability_type' => array('edit_county'),
 					);
 					register_post_type($county['custom_post_id'], $args);
-				}
+					//var_dump($GLOBALS['wp_post_types'][$county['custom_post_id']]);
+				//}
 			}
 			
 			return true;
