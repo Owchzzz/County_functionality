@@ -21,7 +21,7 @@ if( !class_exists('TC_County_functionality')) {
 			
 			//Settings
 			$this->table = $wpdb->prefix.'tc_county';
-			$this->version = "0.0.16";
+			$this->version = "0.0.18";
 			$this->loader = new Tc_County_loader($this->version,$this->table);
 	
 			//Initial run Time
@@ -36,8 +36,15 @@ if( !class_exists('TC_County_functionality')) {
 			$this->loader->update();
 			add_action('admin_menu',array($this,'register_menus'));
 			add_action('init',array($this,'initialize_page'));
+			add_action('init',array($this,'initialize_session'));
 			
 			add_action('admin_init',array($this,'register_roles'));
+		}
+		
+		public function initialize_session() {
+			if( !session_id() ) {
+				session_start();
+			}
 		}
 		
 		public function register_roles() {
@@ -71,6 +78,7 @@ if( !class_exists('TC_County_functionality')) {
 			add_menu_page('County Functionality','County System','manage_options','county_func_admin', array($this,'load_county_admin'), 'dashicons-location-alt');
 			add_submenu_page('county_func_admin','Add new County','Add new County','manage_options','county_func_admin_add_county',array($this,'load_county_admin_add_county'));
 			add_submenu_page(null,'Edit county','Edit County','manage_options','county_func_admin_edit_county',array($this,'load_county_admin_edit_county'));
+			add_submenu_page('county_func_admin','Settings', 'Settings','manage_options','county_func_admin_settings',array($this,'load_county_admin_settings'));
 			if(WP_DEBUG) { // Checking if in development mode.
 				add_submenu_page('county_func_admin','All Counties','All Counties','manage_options','county_func_admin_show_counties',array($this,'show_counties')); 
 			}
@@ -188,6 +196,11 @@ if( !class_exists('TC_County_functionality')) {
 				$this->redirect(admin_url('admin.php?page=county_func_admin&status=unable_to_edit_nopriv'));
 			}
 				
+		}
+		
+		//Load settings
+		public function load_county_admin_settings() {
+			require_once('admin/settings.php');
 		}
 		
 		

@@ -1,3 +1,42 @@
+<style>
+ul.county-admin-menu {
+	margin-top:0px;
+}
+ul.county-admin-menu > li {
+	display:inline;
+	padding:3px;
+	border-right:1px solid #fafafa;
+}
+	
+ul.county-admin-menu > li:(last-of-type) {
+	border-right:none;
+}
+	
+div.optionspannel {
+	background-color:#fafafa;
+	padding:15px;
+	border:1px solid #cdcdcd;
+}
+	
+.optionspannel label{
+	display:block;	
+	margin-top:8px;
+}
+	
+.optionspannel input[type="submit"] {
+	display:block;
+	float:right;
+	clear:both;
+	margin-top:15px;
+	font-size:11px;
+	background-color:#545454;
+	padding:5px;
+	color:white;
+	border:0px;
+	cursor:pointer;
+}
+</style>
+
 <?php if(isset($action)) {
 	if($action == true) {
 		echo '<div class="updated notice is-dismissible"><p>Succesfully deleted post.</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
@@ -22,11 +61,39 @@
 	</div>
 	
 	<div class="postbox" style="padding:15px;width:90%;margin-bottom:15px;">
-		<b>Admin menu</b>: <a href="<?php echo admin_url('post.php?post='.$county['post_id'].'&action=edit');?>">Edit Main County Page</a>
+		<b style="display:block;float:left;">Admin menu: </b>
+		<ul style="display:inline;list-style-type:none;float:left;margin-left:15px;" class="county-admin-menu">
+			<li><a href="<?php echo admin_url('post.php?post='.$county['post_id'].'&action=edit');?>">Edit Main County Page</a></li>
+			<li><a href="admin.php?page=<?php echo $menuslug;?>&cat=news">News Section</a></li>
+			<li><a href="admin.php?page=<?php echo $menuslug;?>&cat=business">Business Section</a></li>
+			<li><a href="admin.php?page=<?php echo $menuslug;?>&cat=obituaries">Obituaries</a></li>
+			<li><a href="admin.php?page=<?php echo $menuslug;?>&cat=classifieds">Classifieds</a></li>
+		</ul>
+		<div style="clear:both">
+			
+		</div>
 	</div>
 	<div class="postbox blog-posts" style="padding:15px;width:60%;float:left;">
+		<?php $post_name = "Blog";
+		
+			if(isset($_GET['cat'])) {
+				$cat = $_GET['cat'];
+				if($cat == 'news' ){
+					$post_name = "News";
+				}
+				else if($cat == 'business') {
+					$post_name = "Business";
+				}
+				else if($cat == 'obituaries') {
+					$post_name = "Obituaries";
+				}
+				else if($cat == 'classifieds') {
+					$post_name = "Classifieds";
+				}
+			}
+		?>
 		<h2 style="margin-bottom:15px;">
-			Blogs Posts <a href="<?php echo admin_url('post-new.php?post_type='.$county['custom_post_id']);?>" class="add-new-h2">Add new</a>
+			<?php echo $post_name;?> Posts <a href="<?php echo admin_url('post-new.php?post_type='.$county['custom_post_id']);?><?php if(isset($_GET['cat'])) echo '&cat='.$_GET['cat'];?>" class="add-new-h2">Add new</a>
 		</h2>
 		<hr/>
 		
@@ -64,9 +131,13 @@ class Techriver_maplists_list extends WP_List_Table{
 			 'cb'      => '<input type="checkbox" />', // Leave this in for bulk functionality
 			 'ID' => 'ID',
 			 'post_title' => 'Title',
-			 
-			 
 		 );
+		 if(isset($_GET['cat'])){
+			if($_GET['cat'] == 'classifieds') {
+				  $this->columns['classifieds_approved'] = 'Approved Classified';
+			  } 
+		 } 
+			  
 		
  
     }
@@ -88,6 +159,25 @@ class Techriver_maplists_list extends WP_List_Table{
 		}
 		
 		$args['post_type'] = $this->county['custom_post_id'];
+		if(isset($_GET['cat'])) {
+			$args['tax_query'] = array(
+				array(
+					'taxonomy' => 'category_county',
+					'field' => 'slug',
+					'terms' => array($_GET['cat'])
+				)
+			);
+		}
+		else {
+			$args['tax_query'] = array(
+				array(
+					'taxonomy' => 'category_county',
+					'field' => 'slug',
+					'terms' => array('news','business','events','obituaries'),
+					'operator' => 'NOT IN')
+			);
+		}
+		
 		$results = (array) get_posts($args);
 		
 		$fresults = array();
@@ -116,6 +206,24 @@ class Techriver_maplists_list extends WP_List_Table{
 	
 	public static function record_count($county) {
   		$args = array('post_type'=>$county['custom_post_id']);
+		if(isset($_GET['cat'])) {
+			$args['tax_query'] = array(
+				array(
+					'taxonomy' => 'category_county',
+					'field' => 'slug',
+					'terms' => array($_GET['cat'])
+				)
+			);
+		}
+		else {
+			$args['tax_query'] = array(
+				array(
+					'taxonomy' => 'category_county',
+					'field' => 'slug',
+					'terms' => array('news','business','events','obituaries'),
+					'operator' => 'NOT IN')
+			);
+		}
 		$results = get_posts($args);
  		
   		return count($results);
@@ -257,6 +365,7 @@ $map_lists_list->prepare_items();
 $map_lists_list->search_box('Search Posts', 'search-box');
 $map_lists_list->display();
 
+
 ?> <!--END OF MAP List Table PHP-->
 				
 	</form>
@@ -265,12 +374,39 @@ $map_lists_list->display();
 	</div>
 	
 	
-	<div class="postbox blog-widgets" style="padding:15px;width:32%;float:right;">
+	<div class="postbox blog-widgets" style="padding:15px;width:32%;float:right;"><!--Sidebar-->
 		<h4>
-			Sidebar
+			County options
 		</h4>
-		<p style="background-color:#fafafa">
-			More Settings and functionality here.
-		</p>
+		
+			<div class="optionspannel">
+				<form method="post">
+					<input type="hidden" name="action" value="themes"/>
+					<label><input type="checkbox" name="custom_theme" /> Enable custom template</label>
+					<input type="submit" value="save"/>
+					<div style="clear:both;">
+						
+					</div>
+				</form>	
+				
+			</div>
+		<h4>
+			Navigation
+		</h4>
+		
+			<div class="optionspannel">
+				<form method="post">
+					<input type="hidden" name="action" value="navigation" />
+					<label><input type="checkbox" name="nav_menu_news" /> News Section</label>
+					<label><input type="checkbox" name="nav_menu_business" /> Business Section</label>
+					<label><input type="checkbox" name="nav_menu_obituaries" /> Obituaries Section</label>
+					<label><input type="checkbox" name="nav_menu_events" /> Local Events Section</label>
+					<label><input type="checkbox" name="nav_menu_classifieds" /> Classifieds Section</label>
+					<input type="submit" value="save"/>
+					<div style="clear:both;">
+						
+					</div>
+				</form>	
+			</div>
 	</div>
 </div>

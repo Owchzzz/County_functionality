@@ -14,7 +14,19 @@ class tc_county_administration {
 		//Perform the checks and initialize
 		add_action('admin_menu',array($this,'load_admin_menu'));
 		add_action('wp_dashboard_setup',array($this,'load_dashboard'));
+		add_action('admin_enqueue_scripts',array($this,'enqueue_scripts'));
 
+	}
+	
+	public function enqueue_scripts() {
+		wp_register_script('tc_county_admin_js',TC_COUNTY_PATH.'assets/js/backend.js',array('jquery'),'1.0.0',true);
+		$data_arr =array();
+		$data_arr['cat'] = '';
+		if(isset($_GET['cat'])) {
+			$data_arr['cat'] = $_GET['cat'];
+		}
+		wp_localize_script('tc_county_admin_js','tc_county_admin',$data_arr);
+		wp_enqueue_script('tc_county_admin_js');
 	}
 	
 	public function load_dashboard() {
@@ -91,6 +103,41 @@ class tc_county_administration {
 				$action = true;
 			}
 		}
+		
+		if(isset($_POST['action'])) {
+			global $wpdb;
+			if($_POST['action'] == 'themes') {
+				$data=array();
+				foreach($_POST as $key => $val) {
+					if($key !== 'action')
+					$data[mysql_real_escape_string($key)] = mysql_real_escape_string($val);
+				}
+				if($wpdb->update($this->table,$data,array('id'=>$this->countyID))) {
+					echo '<div class="update notice is-dismissible">Successfully updated.</div>';
+				}
+				else {
+					echo '<div class="error notice is-dismissible">Error try again later.</div>';
+				}
+				
+			}
+			else if($_POST['action'] == 'navigation') {
+				$data = array();
+				foreach($_POST as $key => $val) {
+					if($key !== 'action') 
+						$data[mysql_real_escape_string($key)] = mysql_real_escape_string($val);
+				}
+				if($wpdb->update($this->table,$data,array('id' => $this->countyID))) {
+					echo '<div class="update notice is-dismissible">Successfully updated.</div>';
+				}
+				else {
+					echo '<div class="error notice is-dismissible">Error try again later.</div>';
+				}
+			}
+			else {
+				echo '<div class="error notice is-dismissible">Unable to complete action</div>';
+			}
+		}
+		$menuslug = $this->admin_menu_slug;
 		require_once('backend/my_county.php');
 	}
 	

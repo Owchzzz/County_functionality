@@ -17,6 +17,8 @@ if(!class_exists('TC_County_loader')) {
 			add_action('init',array($this,'startSession'), 1);
 			add_action('wp_logout',array($this,'endSession'));
 			add_action('wp_login',array($this,'endSession'));
+			
+			
 		}
 		
 		public function startSession() {
@@ -57,6 +59,7 @@ if(!class_exists('TC_County_loader')) {
 			$role->add_cap('read_private_edit_countys');
 			if($admin == 'county') {
 				$role->add_cap('edit_posts');
+				$role->add_cap('level_1');
 			}
 		}
 		
@@ -90,14 +93,30 @@ if(!class_exists('TC_County_loader')) {
 		}
 		
 		public function update() {
+			$updated=true;
 			if($this->version != get_option('tc_county_func_ver')) {
 				$this->create_table();
 				update_option('tc_county_func_ver',$this->version);
+				$updated=false;
 			}
+			$this->load_data($updated);
+			
 			add_action('init',array($this,'run_check'));	
 			
 		}
 		
+		
+		private function load_data($updated) {
+			$defaultdata = array( //set the default data
+			'main-menu-id' => 'menu-main-menu');
+			
+			if(!get_option('tc_county_data')) {
+				add_option('tc_county_data',$defaultdata);
+			}
+			if(get_option('tc_county_data') && !$updated) {
+				update_option('tc_county_data',$defaultdata);
+			}
+		}
 		
 		public function run_check() {
 			global $wpdb;
@@ -133,12 +152,19 @@ if(!class_exists('TC_County_loader')) {
 				description text,
 				county_admin text,
 				facebook_url text,
+				custom_theme BOOLEAN NOT NULL DEFAULT 0,
+				nav_menu_news BOOLEAN NOT NULL DEFAULT 1,
+				nav_menu_business BOOLEAN NOT NULL DEFAULT 1,
+				nav_menu_obituaries BOOLEAN NOT NULL DEFAULT 1,
+				nav_menu_events BOOLEAN NOT NULL DEFAULT 1,
+				nav_menu_classifieds BOOLEAN NOT NULL DEFAULT 1,
 				UNIQUE KEY id (id)
 			) $charset_collate;";
 
 			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
 			dbDelta( $sql );
 		}
+		
 		
 		
 		
