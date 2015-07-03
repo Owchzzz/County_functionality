@@ -1,3 +1,4 @@
+
 ul.county-loop {
 	clear:both;
 	font-size:12px;
@@ -33,16 +34,15 @@ ul.county-loop li p a {
 }
 
 .overlay { /* twentyfifteen fix*/
-	display:block;
-	width:11000%;
-	height:11000%;
 	background-color:#d4d4d4;
-	z-index:0;
+	width:100%;
+	height:100%;
 	position:absolute;
 	top:0;
 	left:0;
-
+	z-index:0;
 }
+
 
 
 .container {
@@ -96,6 +96,13 @@ ul.county-loop li p a {
 	min-width:50px;
 }
 
+.techriver {
+	background-color:#d4d4d4;
+	display:block;
+	clear:both;
+	margin-bottom:35px;
+}
+
 .techriver .content {
 	background-color:white;
 	border:1px solid #e6e6e6;
@@ -121,7 +128,6 @@ ul.county-loop li p a {
 }
 
 .techriver .content .content-body {
-	padding:15px;
 	margin-top:10px;
 	font-size:12px;
 	line-height:1.3;
@@ -144,4 +150,50 @@ border-top-right-radius: 3px;
 
 .techriver .margin-top {
 	margin-top:25px;
+}
+
+.techriver .county-overview {
+	padding:15px;
+}
+
+.techriver .county-overview img {
+	display:block;
+	vertical-align:middle;
+	width:100%;
+	max-height:200px;
+}
+
+.techriver .county-overview h3.county-name {
+	font-size:16px;
+	color:#e33c1c;
+	float:right;
+	margin-bottom:15px;
+}
+
+.techriver .county-overview p.county-desc {
+	display:block;
+	font-size:12px;
+	clear:both;
+	text-align:justify;
+}
+
+.techriver .county-overview a.county-link {
+	float:right;
+	margin-top:5px;
+	color:#e33c1c;
+	text-decoration:none;
+}
+
+.techriver .county-overview a.county-link:hover {
+	text-decoration:underline;
+}
+
+.techriver .clear {
+	clear:both;
+	display:block;
+}
+
+.techriver .gray {
+	background-color:#f0f0f0;
+	border-top:1px solid #e5e5e5;
 }

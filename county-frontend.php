@@ -4,7 +4,7 @@ class tc_county_frontend {
 	protected $table;
 	public function __construct($table) {
 		$this->table = $table;
-		add_action('wp_enqueue_scripts',array($this,'load_frontend_scripts'));
+		add_action('wp_enqueue_scripts',array($this,'load_frontend_scripts'),0);
 		add_shortcode('load_main_county',array($this,'load_main_county'));
 		add_shortcode('load_county',array($this,'load_county'));
 		
@@ -131,6 +131,7 @@ class tc_county_frontend {
 				while($query->have_posts()){
 					$query->the_post();
 					$output.='<li><a style="text-decoration:none;" href="'.get_the_permalink().'"  rel="bookmark" title="'.get_the_title().'">'.get_the_title().'</a><br/><br/><p>Author: <a href="'.get_author_posts_url(get_the_author_meta('ID')).'">'.get_the_author().'</a> on '.get_the_date().'</p></li>';
+					
 				}
 				$output.="</ul>";
 			}
@@ -140,12 +141,131 @@ class tc_county_frontend {
 	}
 	
 	public function load_main_county() {
-		$output = "";
+		global $wpdb;
+		$output='';
+		$args = array('post_type'=>'tc_county','post_status'=>'publish');
+		$posts = new WP_Query($args);
+		if(!empty($posts) ){
+			$count=0;
+			foreach($posts->posts as $post) {
+				$post_meta = get_post_meta($post->ID,'tc_description',true);
+				$params =array();
+				$thumb = wp_get_attachment_image_src( get_post_thumbnail_id($post->ID), 'thumbnail_size' );
+				$url = $thumb['0'];
+					if($count%2 == 0) {
+						$params['mainclass'] = 'county-overview';
+						$params['content'] = '<div class="col-xs-6">
+											<img class="img-responsive" src="'.$url.'"/>
+										</div>
+										<div class="col-xs-6">
+											<h3 class="county-name" >
+												<a href="'.get_the_permalink($post->ID).'" onclick="set_session_href(event,this,\'current_county\',\''.$post->ID.'\');" class="header-link">'.get_the_title($post->ID).'</a>
+											</h3>
+											<p class="county-desc">
+												'.$post_meta.'	
+											<br/>
+												<a href="'.get_the_permalink($post->ID).'" onclick="set_session_href(event,this,\'current_county\',\''.$post->ID.'\');" class="county-link">View more</a>
+											</p>
+										</div>';
+					}
+					else {
+						$params['mainclass'] = 'county-overview gray';
+						$params['content'] = '
+										<div class="col-xs-6">
+											<h3 class="county-name">
+												<a href="'.get_the_permalink($post->ID).'" onclick="set_session_href(event,this,\'current_county\',\''.$post->ID.'\');" class="header-link">'.get_the_title($post->ID).'</a>
+											</h3>
+											<p class="county-desc">
+												'.$post_meta.'	
+											<br/>
+												<a href="'.get_the_permalink($post->ID).'" onclick="set_session_href(event,this,\'current_county\',\''.$post->ID.'\');" class="county-link">View more</a>
+											</p>
+										</div>
+										<div class="col-xs-6">
+											<img class="img-responsive" src="'.$url.'"/>
+										</div>
+										';
+					}
+					$output.='<div class="'.$params['mainclass'].'">
+										'.$params['content'].'
+										<div class="clear"></div>
+									</div>';	
+					$count++;
+			}
+		}
+		return $output;
+		
+	}
+	
+	public function old_load_main_county() {
+		$output = '';
 		
 		global $wpdb;
 		$data = $wpdb->get_results("SELECT * FROM {$this->table}",ARRAY_A);
+		$count=0;
+		
 		foreach($data as $county) {
-			$output .= "<li><a href=\"".site_url('index.php/tc_county/'.$county['custom_page_id'])."\" onclick=\"set_session_href(event,this,'current_county','{$county['id']}');\">{$county['name']}</a>";
+			//$oldoutput .= "<li><a href=\"".site_url('index.php/tc_county/'.$county['custom_page_id'])."\" onclick=\"set_session_href(event,this,'current_county','{$county['id']}');\">{$county['name']}</a>";
+			$custompageid = $county['custom_page_id'];
+			$count=0;
+			if(strlen($custompageid) < 1 ) {
+				die('Error. could not retreive data. Try again later');	
+			}
+			else {
+				$post_args = array('post_type' => 'tc_county');
+				$post = new WP_Query($post_args);
+				var_dump($post);
+				echo 'custompageid: '.$custompageid;
+				var_dump($post);
+				if(empty($post)) {
+					die('Error. could not retrieve post. Try again later');
+				}
+				else {
+					$params =array();
+					if($count%2 == 0) {
+						$params['mainclass'] = 'county-overview';
+						$params['content'] = '<div class="col-xs-6">
+											<img class="img-responsive" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIsqVQVpUbAqXzdjKBESA6NMXcVjij1yl11hrATitJb0P2cd9Q"/>
+										</div>
+										<div class="col-xs-6">
+											<h3 class="county-name" >
+												<a href="'.site_url('index.php/tc_county/'.$county['custom_page_id']).'" onclick="set_session_href(event,this,\'current_county\',\''.$county['id'].'\');" class="header-link">'.$county['name'].'</a>
+											</h3>
+											<p class="county-desc">
+												'.$county['description'].'	
+											<br/>
+												<a href="'.site_url('index.php/tc_county/'.$county['custom_page_id']).'" onclick="set_session_href(event,this,\'current_county\',\''.$county['id'].'\');" class="county-link">View more</a>
+											</p>
+										</div>';
+					}
+					else {
+						$params['mainclass'] = 'county-overview gray';
+						$params['content'] = '
+										<div class="col-xs-6">
+											<h3 class="county-name">
+												<a href="'.site_url('index.php/tc_county/'.$county['custom_page_id']).'" onclick="set_session_href(event,this,\'current_county\',\''.$county['id'].'\');" class="header-link">'.$county['name'].'</a>
+											</h3>
+											<p class="county-desc">
+												'.$county['description'].'	
+											<br/>
+												<a href="'.site_url('index.php/tc_county/'.$county['custom_page_id']).'" onclick="set_session_href(event,this,\'current_county\',\''.$county['id'].'\');" class="county-link">View more</a>
+											</p>
+										</div>
+										<div class="col-xs-6">
+											<img class="img-responsive" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRIsqVQVpUbAqXzdjKBESA6NMXcVjij1yl11hrATitJb0P2cd9Q"/>
+										</div>
+										';
+					}
+					$output.='<div class="'.$params['mainclass'].'">
+										'.$params['content'].'
+										<div class="clear"></div>
+									</div>';	
+					$count++;
+				}
+				
+				
+			}
+			
 		}
 		
 		return $output;

@@ -20,7 +20,8 @@ if(!class_exists('tc_county_loader_spec')) {
 						'has_archive' => true,
 						'public' => true, 
 						'show_in_menu' => false,
-						'capability_type' => 'edit_county'
+						'capability_type' => 'edit_county',
+						'supports' => array('title','editor','thumbnail')
 						//'capability_type'     => array('edit_county'),
 					);
 				if(!current_user_can('manage_options')) {	
@@ -32,7 +33,37 @@ if(!class_exists('tc_county_loader_spec')) {
 					$wp_post_types['tc_county']->capability_type ='edit_county';
 	
 			}
+			
+			//Add custom meta to post type
+			add_action('add_meta_boxes',array($this,'tc_county_meta_create'));
+			add_action('save_post',array($this,'tc_county_meta_save'));
 		}
+		
+		public function tc_county_meta_create( $post ) {
+			
+			$screens = array('tc_county');
+			foreach($screens as $screen) {
+				add_meta_box('tc_description', __('Description'),array($this,'tc_county_meta_build'),$screen);	
+			}
+		}
+		
+		public function tc_county_meta_build( $post ) {
+			//var_dump($post);
+			$value = get_post_meta($post->ID, 'tc_description',true);
+			
+			echo 'This is the custom description that will be shown when loaded in the main county area.';
+			echo '<textarea style="display:block;clear:both;width:100%;height:200px;resize:no-resize;" id="tc_description" name="tc_description">'.$value.'</textarea>';
+		}
+		
+		public function tc_county_meta_save( $post_id ) {
+			if(isset($_POST['tc_description'])) {
+				$data = sanitize_text_field($_POST['tc_description']);
+				update_post_meta($post_id, 'tc_description',$data);
+			}
+		}
+						 
+					 
+					 
 		
 		public function check_unassigned_counties() {
 			global $wpdb;
@@ -99,7 +130,22 @@ if(!class_exists('tc_county_loader_spec')) {
 			add_action('add_meta_boxes',array($this,'build_meta'));
 			flush_rewrite_rules();
 			
-			
+			$this->clean_posts();
+		}
+		
+		private function clean_posts() {
+			global $wpdb;
+			$args = array('post_type'=>'tc_county');
+			$posts = new WP_Query($args);
+			if(!empty($posts)) {
+				foreach($posts->posts as $post) {
+					$id = $post->ID;
+					$query = $wpdb->get_results("SELECT post_id FROM {$this->table} WHERE post_id = {$id}");
+					if(empty($query)) {
+						wp_delete_post($id);
+					}
+				}
+			}
 		}
 		
 		
@@ -135,7 +181,7 @@ if(!class_exists('tc_county_loader_spec')) {
 		
 		private function build_posts($counties) {
 			foreach($counties as $county) {
-				if( ! post_type_exists($county['custom_post_id']) ) {
+				if( ! post_type_exists($county['custom_post_id'])) {
 					
 					$labels = array(
 						'name' => 'County Posts',

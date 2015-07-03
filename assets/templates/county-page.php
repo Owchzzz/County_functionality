@@ -1,14 +1,23 @@
 <html>
 	<head>
 		<?php wp_head();?>
+		<style>
+			body:before {
+				display:none;
+				z-index:-5;
+			}
+			body {
+				background-color:#d4d4d4;
+			}
+		</style>
 	</head>
-		<div class="overlay"></div>
+	<div class="overlay"></div>
 	<div class="techriver">
 	<nav class="navbar navbar-default navbar-static-top">
   		<div class="container">
 	    		<div class="navbar-header">
-				<a class="navbar-brand" href="#">
-					<img alt="Brand" src="http://militiatoday.com/wp-content/uploads/2015/02/logo4.png"/>
+				<a class="navbar-brand" href="<?php echo home_url('/');?>">
+					<img alt="Militiatoday" src="http://port-80.74cjgse9go561orvo9o6g3kysii19k9g9vlw38kn75jyvi.box.codeanywhere.com/wordpress/wp-content/uploads/2015/07/logo4.png"/>
 				</a>
 			</div>
 			
@@ -30,12 +39,9 @@
 							</h2>
 						</div>
 						<div class="content-body">
-							
-							<div class="county-overview">
-								
-							</div>
-							
+							<?php echo do_shortcode('[load_main_county]');?>
 						</div>
+						
 					</div>
 				</div>
 				
@@ -69,5 +75,6 @@
 			</div>
 		</div>
 	</div>
+	
 	<?php wp_footer();?>
 </html>
