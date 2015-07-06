@@ -39,6 +39,13 @@ if( !class_exists('TC_County_functionality')) {
 			add_action('init',array($this,'initialize_session'));
 			
 			add_action('admin_init',array($this,'register_roles'));
+			add_action('plugins_loaded',array($this,'dependency_check'));
+		}
+		
+		public function dependency_check() {
+		if(!class_exists('IonIcons')) {
+			echo '<div class="error is-dismissible"><p>Please install the IonIcons for wordpress plugin. it is required to ensure full functionality of the site.</p></div> ';	
+		}	
 		}
 		
 		public function initialize_session() {

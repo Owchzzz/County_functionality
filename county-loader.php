@@ -1,5 +1,6 @@
 <?php
 // Object to initialize all county and their functionality.
+define("OVERWRITE",true); // Set false during production
 if(!class_exists('tc_county_loader_spec')) {
 	class tc_county_loader_spec {
 		protected $table;
@@ -181,7 +182,7 @@ if(!class_exists('tc_county_loader_spec')) {
 		
 		private function build_posts($counties) {
 			foreach($counties as $county) {
-				if( ! post_type_exists($county['custom_post_id'])) {
+				if( ! post_type_exists($county['custom_post_id']) || OVERWRITE) {
 					
 					$labels = array(
 						'name' => 'County Posts',
@@ -196,6 +197,7 @@ if(!class_exists('tc_county_loader_spec')) {
 						'public' => true,
 						'show_in_menu' => false,
 						'taxonomies' => array('category_county'),
+						'supports'=>array('editor','title','thumbnail','excerpt'),
 						'capability_type' => 'edit_county',
 						'capabilities' => array('edit_posts'=>'edit_county','edit_post'=>'edit_county')
 						//'capability_type' => array('edit_county'),

@@ -1,3 +1,7 @@
+@font-face {
+	font-family: 'bebas';
+	src: url('../fonts/bebas.ttf');
+}
 
 ul.county-loop {
 	clear:both;
@@ -64,8 +68,8 @@ ul.county-loop li p a {
 	position:relative;
 	right:0px;
 	float:right;
-	width:90%;
 	height:30px;
+	margin-top:5px;
 }
 
 .navbar .search-group .searchtext {
@@ -94,6 +98,37 @@ ul.county-loop li p a {
 	height:30px;
 	z-index:1;
 	min-width:50px;
+}
+
+.navbar-nav>li>a {
+	padding-top:16px;
+}
+
+.navbar-nav > li {
+	font-size:11px;
+	color:white;
+}
+
+.navbar-default .navbar-nav>.active>a, .navbar-default .navbar-nav>.active>a:focus, .navbar-default .navbar-nav>.active>a:hover {
+	background-color:#0b80ad;
+	color:white;
+}
+
+.navbar-nav > li.active > a:hover {
+	color:white;
+	text-decoration:none;
+}
+
+.navbar-default .navbar-nav>li>a {
+	color:white;	
+}
+
+.navbar-default .navbar-nav>li>a:hover {
+	color:white;
+	text-decoration:underline;
+}
+.navbar-collapse, .navbar-default .navbar-form {
+	border:0;	
 }
 
 .techriver {
@@ -180,9 +215,21 @@ border-top-right-radius: 3px;
 .techriver .county-overview a.county-link {
 	float:right;
 	margin-top:5px;
-	color:#e33c1c;
+	color:#0b80ad;
 	text-decoration:none;
 }
+
+.techriver .county-overview a.county-link-left {
+	float:left;
+	margin-top:5px;
+	color:#0b80ad;
+	text-decoration:none;
+}
+
+.techriver .pull-left{
+	float:left;	
+}
+
 
 .techriver .county-overview a.county-link:hover {
 	text-decoration:underline;
@@ -196,4 +243,231 @@ border-top-right-radius: 3px;
 .techriver .gray {
 	background-color:#f0f0f0;
 	border-top:1px solid #e5e5e5;
+}
+
+/*single page*/
+.techriver2 .navbar {
+	background-color:transparent;
+}
+
+.techriver2 .county-header {
+	display:block;
+	background-color:white;
+	max-height:230px;
+}
+
+.techriver2 .white-cover {
+	background-color:white;	
+}
+
+.techriver2 .header-brand {
+	font-family:bebas;
+	float:left;
+	clear:both;
+	width:100%;
+	padding:15px;
+	color:white;
+	background-color:#003470;
+	display:block;
+	margin-bottom:0px !important;
+}
+
+.techriver2 .header-brand {	
+}
+
+.techriver2 .county-header .county-logo {
+	display:block;
+	position:relative;
+	left:0%;
+	
+}
+
+.techriver2 h2.county-text {
+	display:block;
+	position:absolute;
+	bottom:20%;
+	right:15%;
+	font-size:30px;
+	font-family:bebas;
+	color:#003470;
+}
+
+.techriver2 .box-content {
+	margin-top:20px;
+	border:1px solid #efefef;
+	background-color:white;
+	padding:15px;
+}
+
+.techriver2 .img-header {
+	display:block;
+	margin:0 auto;	
+	max-height:200px;
+	margin-bottom:35px;
+}
+
+.techriver2 p.par-header {
+		width:70%;
+	font-size:13px;
+	line-height:1.2;
+	text-align:justify;
+	margin:0px auto;
+	margin-bottom:25px;
+}
+
+.techriver2 p {
+	text-align:justify;
+	font-size:13px;
+}
+.techriver2 .news-snippet {
+	clear:both;
+	display:block;
+	float:left;
+	background-color:white;
+	border:1px solid #efefef;
+	margin-top:15px;
+	margin-bottom:15px;
+}
+.techriver2 .news-snippet p {
+	display:block;
+	float:left;
+	margin-left:10px;
+}
+
+.techriver2 .news-snippet a {
+	font-size:10px;
+}
+
+.techriver2 .news-snippet p.content-half {
+	width:55%;	
+}
+.techriver2 .news-snippet p.content-full {
+	display:block;
+	margin:0px auto;
+	width:100%;
+}
+.techriver2 .news-snippet img.thumb {
+	display:block;
+	float:left;
+	width:40%;
+	
+}
+.outerpadding {
+	padding:10px;	
+}
+.thumbnail img.thumb {
+	display:block;
+	max-height:230px;
+}
+.thumbnail span {
+	display:block;
+	float:right;
+	background-color:#e33d1d;
+	font-family:bebas;
+	font-weight:bold;
+	font-size:24px;
+	padding:15px;
+}
+
+.techriver2 .social-media {
+	margin-top:5px;	
+}
+
+.techriver2 .social-media i {
+	display:block;
+	float:left;
+	margin-left:10px;	
+}
+
+
+.techriver2 .post .post-title{
+	display:block;
+	background-color:#003470;
+	font-size:24px;
+	color:white;
+	padding:15px;
+	width:100%;
+	font-weight:normal;
+	font-family:bebas;
+	margin-top:25px;
+	margin-bottom:0px !important;
+	border:1px solid #003470;
+}
+
+.techriver2 nav.county-menu {
+	display:block;
+	color:#003470;
+	font-family:Verdana;
+	font-size:10px;
+	font-weight:normal;
+}
+
+.techriver2 nav.county-menu ul {
+	text-align:right;
+	list-style-type:none;
+}
+
+.techriver2 .content p img {
+	display:block;
+	max-width:100%;
+}
+
+.techriver2 .white {
+	color:white;	
+}
+
+.techriver2 .margin-right {
+	margin-right:15px;	
+}
+
+.crsl-item h3 a{
+	font-size:14px;	
+}
+
+.techriver2 .margin-top {
+	display:block;
+	float:left;
+	margin-top:15px;
+}
+
+.techriver2 .blog-post {
+	display:block;
+	margin-top:15px;
+	border:1px solid #dadada;
+	padding:15px;
+	color:white;
+	background-color:#eaeaea;
+}
+
+.techriver2 .blog-post img{
+	width:100%;
+	padding:15px;
+	background-color:white;
+}
+
+.techriver2 .blog-post .post-content{
+	padding:25px;
+	background-color:white;
+	color:black;
+}
+.techriver2 .blog-post .post-content h2 {
+	font-family:bebas;	
+}
+
+.techriver2 .pagination {
+	display:block;
+	float:right;
+	margin:0px auto;
+}
+
+.techriver2 .pagination > ul > li{
+	font-size:12px;
+		padding:3px;
+		background-color:#eaeaea;
+	border:1px solid #dadada;
+}
+@media screen and (max-width : 910px) {
+	.techriver2 h2.county-text {
+		font-size:18px;
+	}
 }
