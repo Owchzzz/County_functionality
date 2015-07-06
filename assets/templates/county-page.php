@@ -40,14 +40,31 @@
 	</nav>
 		<div class="container">
 			<div class="row">
+				<div class="col-xs-12">
+					<div class="content" style="padding:25px;">
+						<div class="col-xs-6">
+						<div id="us-map" style="display:block;width:100%;height:350px;"></div>
+							<small style="position:absolute;bottom:0;right:0;" id="temp-state">...</small>
+						</div>
+						<div class="col-xs-6">
+							<div id="state-info">
+								<h2 id="state-name"></h2>
+							</div>
+						</div>
+						<div style="clear:both;"></div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
 				<div class="col-xs-12 col-md-9"> <!--main body-->
+					
 					<div class="content">
 						<div class="content-header">
 							<h2>
 								County Chapters
 							</h2>
 						</div>
-						<div class="content-body">
+						<div class="content-body" id="states_counties">
 							<?php echo do_shortcode('[load_main_county]');?>
 						</div>
 						
@@ -88,4 +105,7 @@
 	</div>
 	
 	<?php wp_footer();?>
+	<script>
+
+	</script>
 </html>

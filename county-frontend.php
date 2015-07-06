@@ -14,6 +14,14 @@ class tc_county_frontend {
 		add_action('wp_ajax_set_session',array($this,'ajax_set_session'));
 		add_action('wp_ajax_nopriv_set_session',array($this,'ajax_set_session'));
 		
+		add_action('wp_ajax_get_state',array($this,'ajax_get_state'));
+		add_action('wp_ajax_nopriv_get_state',array($this,'ajax_get_state'));
+		
+		add_action('wp_ajax_get_county_snip',array($this,'ajax_get_county_snip'));
+		add_action('wp_ajax_nopriv_get_county_snip',array($this,'ajax_get_county_snip'));
+		
+		
+		
 		
 		add_action('wp_print_scripts',array($this,'localize_script'));
 		
@@ -48,6 +56,27 @@ class tc_county_frontend {
 		}
 	}
 	
+	public function ajax_get_state() {
+		$serialized = array();
+		foreach($_POST as $key=>$val) {
+			$serialized[mysql_real_escape_string($key)] = mysql_real_escape_string($val);	
+		}
+		
+		if(isset($serialized['name'])) {
+			global $wpdb;
+			$data = $wpdb->get_results("SELECT * FROM {$this->table} WHERE state='{$serialized['name']}'");
+			$jsondata = json_encode($data);
+			echo $jsondata;
+			exit();
+		}
+		else {
+			wp_send_json_error();
+			exit();
+		}
+		
+		return false;
+	}
+	
 	public function ajax_set_session(){
 		$serialized = array();
 		foreach($_POST as $key=>$val) {
@@ -72,6 +101,64 @@ class tc_county_frontend {
 		return true;
 	}
 	
+	public function ajax_get_county_snip() {
+		$serialized = array();
+		foreach($_POST as $key=>$val) {
+			$serialized[mysql_real_escape_string($key)] = mysql_real_escape_string($val);	
+		} // Serialize data.
+		
+		if(isset($serialized['post_id'])) {
+			$count = $serialized['count'];
+			$post = get_post($serialized['post_id']);
+			if(!empty($post)) {
+				$post_meta = get_post_meta($post->ID,'tc_description',true);
+				$params =array();
+				$thumb = wp_get_attachment_image_src( get_post_thumbnail_id($post->ID), 'thumbnail_size' );
+				$url = $thumb['0'];
+					if($count%2 == 0) {
+						$params['mainclass'] = 'county-overview';
+						$params['content'] = '<div class="col-xs-12 col-sm-4">
+											<img class="img-responsive" src="'.$url.'"/>
+										</div>
+										<div class="col-xs-12 col-sm-8">
+											<h3 class="county-name" >
+												<a href="'.get_the_permalink($post->ID).'" onclick="set_session_href(event,this,\'current_county\',\''.$post->ID.'\');" class="header-link">'.get_the_title($post->ID).'</a>
+											</h3>
+											<p class="county-desc">
+												'.$post_meta.'	
+											<br/>
+												<a href="'.get_the_permalink($post->ID).'" onclick="set_session_href(event,this,\'current_county\',\''.$post->ID.'\');" class="county-link">View more</a>
+											</p>
+										</div>';
+					}
+					else {
+						$params['mainclass'] = 'county-overview gray';
+						$params['content'] = '
+										<div class="col-xs-12 col-sm-8">
+											<h3 class="county-name pull-left">
+												<a href="'.get_the_permalink($post->ID).'" onclick="set_session_href(event,this,\'current_county\',\''.$post->ID.'\');" class="header-link">'.get_the_title($post->ID).'</a>
+											</h3>
+											<p class="county-desc">
+												'.$post_meta.'	
+											<br/>
+												<a href="'.get_the_permalink($post->ID).'" onclick="set_session_href(event,this,\'current_county\',\''.$post->ID.'\');" class="county-link">View more</a>
+											</p>
+										</div>
+										<div class="col-xs-12 col-sm-4">
+											<img class="img-responsive" src="'.$url.'"/>
+										</div>
+										';
+					}
+					$output='<div class="'.$params['mainclass'].'">
+										'.$params['content'].'
+										<div class="clear"></div>
+									</div>';	
+				echo $output;
+				exit();
+			}
+		}
+	}
+	
 	
 
 	
@@ -83,6 +170,26 @@ class tc_county_frontend {
 		//Sliders
 		wp_register_style('crsl-style',TC_COUNTY_PATH.'assets/css/crsl.css');
 		wp_register_script('crsl-js',TC_COUNTY_PATH.'assets/js/crsl.js',array('jquery'));
+		
+		//Raphael library
+		wp_register_script('raphael-js',TC_COUNTY_PATH.'assets/us-map/lib/raphael.js');
+		wp_enqueue_script('raphael-js');
+		
+		//US MAP
+		wp_register_script('us-map',TC_COUNTY_PATH.'assets/us-map/us-map.js',array('jquery'));
+		wp_register_script('color-jquery',TC_COUNTY_PATH.'assets/us-map/example/color.jquery.js',array('jquery'));
+		wp_enqueue_script('color-jquery');
+		wp_enqueue_script('us-map');
+		
+		$wpdata = array(
+			'ajax_url' => admin_url('admin-ajax.php'),
+			'spinner' => TC_COUNTY_PATH.'assets/images/ajax-loader.gif'
+		);
+		wp_register_script('county-page',TC_COUNTY_PATH.'assets/js/county-page.js',array('jquery','us-map'));
+		wp_localize_script('county-page','wpdata',$wpdata);
+		wp_enqueue_script('county-page');
+		
+		
 		
 		wp_enqueue_style('twitterbootstrap');
 		wp_enqueue_script('twitterbootstrapjs');
@@ -312,7 +419,7 @@ class tc_county_frontend {
 		}
 	}
 	
-	public function load_main_county() {
+	public function load_main_county() { //Deprecated
 		global $wpdb;
 		$output='';
 		$args = array('post_type'=>'tc_county','post_status'=>'publish');
