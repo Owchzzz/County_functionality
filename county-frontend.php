@@ -10,6 +10,7 @@ class tc_county_frontend {
 		add_shortcode('load_news_snippet',array($this,'load_news_snippet'));
 		add_shortcode('load_county_blog_snips',array($this,'load_county_blog_snips'));
 		add_shortcode('load_county_desc',array($this,'load_county_desc'));
+		add_shortcode('recent_posts_snip',array($this,'recent_posts_snip'));
 		
 		add_action('wp_ajax_set_session',array($this,'ajax_set_session'));
 		add_action('wp_ajax_nopriv_set_session',array($this,'ajax_set_session'));
@@ -160,7 +161,29 @@ class tc_county_frontend {
 	}
 	
 	
-
+	private function build_new_href($get,$add_args) {
+		$uri_parts = explode('?', $_SERVER['REQUEST_URI'], 2);	
+		$href = $uri_parts[0]."?";
+		$count=1;
+		foreach($get as $key=>$val) {
+			if($count == 1) {
+				$href.=$key.'='.$val;	
+			}
+			else {
+				$href.='&'.$key.'='.$val;	
+			}
+			$count++;
+		}
+		
+		foreach($add_args as $key=>$val) {
+			if($count > 1) {
+				$href.='&';	
+			}
+			$href.="{$key}={$val}";
+		}
+		
+		return $href;
+	}
 	
 	public function load_frontend_scripts() {
 		//Bootstrap
@@ -200,6 +223,27 @@ class tc_county_frontend {
 		wp_register_script('tc_county_frontend_js',TC_COUNTY_PATH.'assets/js/frontend.js',array('jquery'));
 		$options = get_option('tc_county_data');
 		$data_arr = array('ajax_url'=> admin_url('admin-ajax.php'),'menu_id'=>$options['main-menu-id']);
+		/*Menu specific options for ads display*/
+		$get = array();
+		foreach($_GET as $key=>$val) {
+			$get[$key] = $val;	
+		}
+		
+		$ads_href_add = $this->build_new_href($get,array('action'=>'ads-new')); // For new add
+		$data_arr['ads_new'] = $ads_href_add;
+		
+		$ads_href_add = $this->build_new_href($get,array('action'=>'ads-edit'));
+		$data_arr['ads_edit'] = $ads_href_add;
+		
+		$ads_href_add = $this->build_new_href($get,array('action'=>'browse-cat'));
+		$data_arr['ads_browsecat'] = $ads_href_add;
+		
+		$data_arr['ads_new_progress'] = false;
+		if(isset($_POST['step'])) {
+			$data_arr['ads_new_progress'] = true;	
+		}
+		
+		
 		
 		$menu_arr = array('Militia Today Home' => home_url('/'),
 					  'Channels' => get_the_guid(get_the_ID()).'?page=channels',
@@ -301,6 +345,49 @@ class tc_county_frontend {
 		}
 		
 		return $output;
+	}
+	
+	public function recent_posts_snip() {
+		global $wpdb;
+		$output="";
+		$sql = "SELECT * FROM {$this->table} ORDER BY RAND() LIMIT 5";
+		$data = $wpdb->get_results($sql,ARRAY_A);
+		
+		$county_arr = array();
+		
+		if(!empty($data)) {
+			foreach($data as $row) {
+				$county_arr[] = $row['custom_post_id'];	
+			}
+		}
+		
+		if(!empty($county_arr)) {
+			$limit = 2;
+			foreach($county_arr as $id) {
+				$args = array('post_type' => $id,'posts_per_page'=>$limit);
+				$quer = new WP_Query( $args );
+				if($quer->have_posts()) {
+					
+					while($quer->have_posts()) {
+						$output .= '<div class="tc-post-snip">';
+						$class = "col-xs-12";
+						$thumb = wp_get_attachment_image_src( get_post_thumbnail_id($quer->ID), 'thumbnail_size' );
+						$quer->the_post();
+						$excerpt = substr(get_the_excerpt(),0,100);
+						if(!empty($thumb)){
+							$output.='<div class="col-xs-6"><img class="img-responsive" src="'.$thumb[0].'"/></div>';
+							$class = "col-xs-6";
+						}
+						$output.='<div class="'.$class.' tc-post-snip-inner">'.$excerpt.' <a class="permalink" href="'.get_the_permalink().'">View full article</a></div>';
+						$output.='<div style="clear:both"></div></div>';
+					}
+				}
+			}
+			$output.='<div style="clear:both;"></div>';
+			return $output;
+		}
+		
+		return false;
 	}
 	
 	public function load_county($args) {
@@ -419,10 +506,10 @@ class tc_county_frontend {
 		}
 	}
 	
-	public function load_main_county() { //Deprecated
+	public function load_main_county() {
 		global $wpdb;
 		$output='';
-		$args = array('post_type'=>'tc_county','post_status'=>'publish');
+		$args = array('post_type'=>'tc_county','post_status'=>'publish','orderby'=>'rand','posts_per_page'=>4);
 		$posts = new WP_Query($args);
 		if(!empty($posts) ){
 			$count=0;
@@ -481,14 +568,21 @@ class tc_county_frontend {
 	//Plugin custom themeing functions
 	
 	public function do_themeing() {
+
 		global $post;
-		//Check for main county page
-		$pageslug = $post->post_name;
+	
+		$pageslug = "";
+		if(isset($post->ID)) $pageslug = $post->post_name;
 		if($pageslug == 'tc_county_func_main') {
 			$this->county_page_redirect();
 		}
+		$posttype = "";
+		if(isset($post->ID)) $posttype = $post->post_type;
 		
-		$posttype = $post->post_type;
+		else {
+			
+		}
+		
 		
 		if($posttype == 'tc_county') { // If custom themeing enabled.
 			$this->singlecounty_page_redirect();
@@ -496,6 +590,12 @@ class tc_county_frontend {
 		else {
 			if($data = $this->is_valid_posttype($posttype)) {
 				$this->postcounty_page_redirect();
+			}
+			else { /*AWPCP modification*/
+				$post_data = get_post($post->post_parent);
+				if($post_data->post_name == 'awpcp') {
+					$this->awpcp_page_redirect();	
+				}
 			}
 		}
 		
@@ -510,6 +610,11 @@ class tc_county_frontend {
 		}
 		
 		return false;
+	}
+	
+	private function awpcp_page_redirect() {
+		$templatefilename='assets/templates/county-show-add.php';
+		$this->do_theme_redirect($templatefilename);
 	}
 	
 	private function county_page_redirect() {
@@ -533,7 +638,7 @@ class tc_county_frontend {
 	
 	private function do_theme_redirect($url) {
 		global $post, $wp_query;
-		if(have_posts()) {
+		if(1==1) {
 			include($url);
 			die();
 		} else {

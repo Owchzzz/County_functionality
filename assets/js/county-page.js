@@ -90,6 +90,7 @@
 				   	var state = data;
 				   	for(var i=0;i<states.length;i++){
 						if(state.name == states[i].abbreviation) $('#state-name').html(states[i].name);
+						if(state.name == states[i].abbreviation) $('#county-head').html(states[i].name);
 					}
 				    var transferdata = {
 					    'action' : 'get_state',

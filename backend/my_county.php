@@ -1,3 +1,4 @@
+
 <style>
 ul.county-admin-menu {
 	margin-top:0px;
@@ -41,6 +42,9 @@ div.optionspannel {
 	if($action == true) {
 		echo '<div class="updated notice is-dismissible"><p>Succesfully deleted post.</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
 	}
+	else {
+		echo '<div class="error notice is-dismissible"><p>Unable to execute command.</p></div>';
+	}	
 }
 ?>
 

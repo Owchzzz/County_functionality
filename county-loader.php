@@ -10,7 +10,6 @@ if(!class_exists('tc_county_loader_spec')) {
 		}	
 		
 		public function load_dependencies() {
-			
 			if(! post_type_exists('tc_county')) { // Register the county post type.
 				$args = array(
 						'labels' => array(
@@ -41,7 +40,6 @@ if(!class_exists('tc_county_loader_spec')) {
 		}
 		
 		public function tc_county_meta_create( $post ) {
-			
 			$screens = array('tc_county');
 			foreach($screens as $screen) {
 				add_meta_box('tc_description', __('Description'),array($this,'tc_county_meta_build'),$screen);	
@@ -62,6 +60,8 @@ if(!class_exists('tc_county_loader_spec')) {
 				update_post_meta($post_id, 'tc_description',$data);
 			}
 		}
+		
+		
 						 
 					 
 					 
@@ -71,7 +71,6 @@ if(!class_exists('tc_county_loader_spec')) {
 			$sql = "SELECT * FROM {$this->table} WHERE custom_post_id LIKE '' OR custom_post_id IS NULL";
 			$counties = $wpdb->get_results($sql,ARRAY_A);
 			if(!empty($counties)){
-				
 				foreach($counties as $county) {
 					$_p = array();
 					$id = $county['id'];

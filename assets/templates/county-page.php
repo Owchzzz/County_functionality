@@ -23,7 +23,6 @@
 					<li><a href="<?php echo home_url('/');?>">Militia Today Home</a></li>
 					<li><a href="#">Web TV</a></li>
 					<li class="active"><a href="#">County Chapters</a></li>
-					<li><a href="#">Classifieds</a></li>
 				</ul>
 			</div>
 	
@@ -60,7 +59,7 @@
 					
 					<div class="content">
 						<div class="content-header">
-							<h2>
+							<h2 id="county-head">
 								County Chapters
 							</h2>
 						</div>
@@ -79,17 +78,15 @@
 							</h4>
 						</div>
 						<div class="content-body">
-							<p style="padding:15px;font-size:12px;">
-							Curabitur ullamcorper commodo vulputate. Integer eget auctor ipsum. Donec scelerisque tincidunt eros. Etiam ex justo, blandit et dui non, facilisis vestibulum dui. Curabitur sit amet vestibulum orci. Sed ut aliquam turpis. Quisque finibus malesuada condimentum.	
-								<a href="#">View more..</a>
-							</p>
+								<?php echo do_shortcode('[recent_posts_snip]');?>
+						
 						</div>
 					</div>
 					
 					<div class="content rounded margin-top">
 						<div class="content-header rounded-top">
 							<h4>
-								Classifieds
+								
 							</h4>
 						</div>
 						<div class="content-body">

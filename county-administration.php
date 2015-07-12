@@ -138,8 +138,48 @@ class tc_county_administration {
 			}
 		}
 		$menuslug = $this->admin_menu_slug;
+		$opts = $this->get_county_opts($county['id']);
 		require_once('backend/my_county.php');
 	}
+	
+	private function build_nav_menu($slug) {
+		$args = array(
+			'post_type'=>$county['custom_post_id']
+		);
+		$query = new WP_Query($args);	
+		
+		
+	}
+	private function get_county_opts($cid) {
+		
+		$slug = 'tc-county-'.$cid;
+		delete_option($slug);
+		$opts=array();
+		if(! $opts = get_option($slug)) {
+			$defaultsettings = array(
+				'section-nav-menu' => array('section_news' => 0,
+							    'section_business' => 0,
+							    'section_obituaries' => 0,
+							    'section_classifieds' => 0),
+				'post-nav-menu' => array(),
+				
+			);
+			add_option($slug,$defaultsettings);	
+			return $defaultsettings;
+		}
+		
+		if(isset($opts['post-nav-menu'])) {
+			$this->build_nav_menu($slug);
+		}
+		
+		
+		if(!empty($opts)) {
+			return $opts;
+		}
+		
+	}
+	
+	
 	
 	public function add_blogpost() {
 		$county = $this->get_county();

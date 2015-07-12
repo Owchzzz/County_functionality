@@ -33,6 +33,12 @@ ul.county-loop li  p {
 	max-width:100%;
 }
 
+a.permalink {
+	color:blue;
+	font-size:10px;
+	float:right;
+}
+
 ul.county-loop li p a {
 	font-size:11px;
 }
@@ -466,6 +472,26 @@ border-top-right-radius: 3px;
 		background-color:#eaeaea;
 	border:1px solid #dadada;
 }
+
+
+.tc-post-snip {
+	display:block;
+	clear:both;
+	padding:15px;
+	min-height:50px;
+	max-width:100%;
+	background-color:#eaeaea;
+}
+
+.tc-post-snip:nth-of-type(even) {
+	background-color:white;	
+}
+
+.tc-post-snip-inner {
+	
+	
+}
+
 @media screen and (max-width : 910px) {
 	.techriver2 h2.county-text {
 		font-size:18px;

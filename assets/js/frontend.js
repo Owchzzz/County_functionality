@@ -9,6 +9,31 @@ jQuery(function($){
 
 		get_session('current_county');
 		
+		
+		/* check if ads exist */
+		if($('.uiwelcome').length > 0) {
+			$('.uiwelcome').html('');	
+		}
+		var menu = '<i id="toggle-new-ads" data-toggle="modal" data-target="#adsNew" class="icon ion-plus-circled">Place new ad</i>';
+		
+		
+		$('.awpcp-menu-items').each(function(i,obj){
+				$(this).html(menu);		
+			
+		});
+		
+		$('.modal .awpcp-menu-items').each(function(i,obj){
+			$(this).html('');
+		});
+		
+		if(tc_county.ads_new_progress == true){
+			$('#toggle-new-ads').trigger('click');
+		}
+		
+		
+		if($('.changecategoryselect').length > 0 ){
+			$('.changecategoryselect form').attr('action',tc_county.ads_browsecat);	
+		}
 	});
 	
 	window.dropdown_list = function(e,obj) {
